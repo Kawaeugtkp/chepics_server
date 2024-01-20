@@ -79,3 +79,127 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, e
 	)
 	return i, err
 }
+
+const deletePost = `-- name: DeletePost :exec
+DELETE FROM posts
+WHERE id = $1
+`
+
+func (q *Queries) DeletePost(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deletePost, id)
+	return err
+}
+
+const getPost = `-- name: GetPost :one
+SELECT id, timestamp, owner_id, type, is_root_opinion, votes, topic, description, caption, topic_id, set_id, category, base_opinion_id, post_image_url, link FROM posts
+WHERE id = $1  LIMIT 1
+`
+
+func (q *Queries) GetPost(ctx context.Context, id int64) (Post, error) {
+	row := q.db.QueryRowContext(ctx, getPost, id)
+	var i Post
+	err := row.Scan(
+		&i.ID,
+		&i.Timestamp,
+		&i.OwnerID,
+		&i.Type,
+		&i.IsRootOpinion,
+		&i.Votes,
+		&i.Topic,
+		&i.Description,
+		&i.Caption,
+		&i.TopicID,
+		&i.SetID,
+		&i.Category,
+		&i.BaseOpinionID,
+		&i.PostImageUrl,
+		&i.Link,
+	)
+	return i, err
+}
+
+const listPosts = `-- name: ListPosts :many
+SELECT id, timestamp, owner_id, type, is_root_opinion, votes, topic, description, caption, topic_id, set_id, category, base_opinion_id, post_image_url, link FROM posts
+ORDER BY timestamp
+LIMIT $1
+OFFSET $2
+`
+
+type ListPostsParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListPosts(ctx context.Context, arg ListPostsParams) ([]Post, error) {
+	rows, err := q.db.QueryContext(ctx, listPosts, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Post{}
+	for rows.Next() {
+		var i Post
+		if err := rows.Scan(
+			&i.ID,
+			&i.Timestamp,
+			&i.OwnerID,
+			&i.Type,
+			&i.IsRootOpinion,
+			&i.Votes,
+			&i.Topic,
+			&i.Description,
+			&i.Caption,
+			&i.TopicID,
+			&i.SetID,
+			&i.Category,
+			&i.BaseOpinionID,
+			&i.PostImageUrl,
+			&i.Link,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updatePost = `-- name: UpdatePost :one
+UPDATE posts
+SET votes = $2
+WHERE id = $1
+RETURNING id, timestamp, owner_id, type, is_root_opinion, votes, topic, description, caption, topic_id, set_id, category, base_opinion_id, post_image_url, link
+`
+
+type UpdatePostParams struct {
+	ID    int64 `json:"id"`
+	Votes int32 `json:"votes"`
+}
+
+func (q *Queries) UpdatePost(ctx context.Context, arg UpdatePostParams) (Post, error) {
+	row := q.db.QueryRowContext(ctx, updatePost, arg.ID, arg.Votes)
+	var i Post
+	err := row.Scan(
+		&i.ID,
+		&i.Timestamp,
+		&i.OwnerID,
+		&i.Type,
+		&i.IsRootOpinion,
+		&i.Votes,
+		&i.Topic,
+		&i.Description,
+		&i.Caption,
+		&i.TopicID,
+		&i.SetID,
+		&i.Category,
+		&i.BaseOpinionID,
+		&i.PostImageUrl,
+		&i.Link,
+	)
+	return i, err
+}
