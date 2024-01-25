@@ -7,12 +7,12 @@ import (
 	"github.com/Kawaeugtkp/chepics_server/api"
 	db "github.com/Kawaeugtkp/chepics_server/db/sqlc"
 	_ "github.com/lib/pq"
+	"github.com/vanng822/go-solr/solr"
 )
 
-
 const (
-	dbDriver = "postgres"
-	dbSource = "postgresql://root:secret@localhost:5433/chepics_db?sslmode=disable"
+	dbDriver      = "postgres"
+	dbSource      = "postgresql://root:secret@localhost:5433/chepics_db?sslmode=disable"
 	serverAddress = "0.0.0.0:8080"
 )
 
@@ -23,7 +23,8 @@ func main() {
 	}
 
 	store := db.NewStore(conn)
-	server := api.NewServer(store)
+	si, _ := solr.NewSolrInterface("http://localhost:8984/solr", "post")
+	server := api.NewServer(store, si)
 
 	err = server.Start(serverAddress)
 	if err != nil {
