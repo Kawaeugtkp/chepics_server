@@ -2,26 +2,27 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Store struct {
 	*Queries
-	db *sql.DB
+	connPool *pgxpool.Pool
 }
 
-func NewStore(db *sql.DB) *Store {
+func NewStore(connPool *pgxpool.Pool) *Store {
 	return &Store{
-		db:      db,
-		Queries: New(db),
+		connPool: connPool,
+		Queries: New(connPool),
 	}
 }
 
 // execTx executes a function within a darabase transaction
 // この第二引数がトランザクション（つまり複数のメソッドが入ったもの）である
 func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
-	tx, err := store.db.BeginTx(ctx, nil)
+	tx, err := store.connPool.Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -29,11 +30,11 @@ func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
 	q := New(tx)
 	err = fn(q)
 	if err != nil {
-		if rbErr := tx.Rollback(); rbErr != nil {
+		if rbErr := tx.Rollback(ctx); rbErr != nil {
 			return fmt.Errorf("tx err: %v, rb err: %v", err, rbErr)
 		}
 		return err
 	}
 
-	return tx.Commit()
+	return tx.Commit(ctx)
 }

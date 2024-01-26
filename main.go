@@ -1,11 +1,12 @@
 package main
 
 import (
-	"database/sql"
+	"context"
 	"log"
 
 	"github.com/Kawaeugtkp/chepics_server/api"
 	db "github.com/Kawaeugtkp/chepics_server/db/sqlc"
+	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/lib/pq"
 	"github.com/vanng822/go-solr/solr"
 )
@@ -17,7 +18,7 @@ const (
 )
 
 func main() {
-	conn, err := sql.Open(dbDriver, dbSource)
+	conn, err := pgxpool.New(context.Background(), dbSource)
 	if err != nil {
 		log.Fatal("cannout connect to db:", err)
 	}

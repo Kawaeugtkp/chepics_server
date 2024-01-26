@@ -2,10 +2,10 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 
 	"github.com/Kawaeugtkp/chepics_server/util"
+	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/require"
 )
 
@@ -64,11 +64,11 @@ func TestUpdateUser(t *testing.T) {
 	user1 := CreateRandomUser(t)
 
 	arg := UpdateUserParams{
-		ID: user1.ID,
-		Username: util.RandomUsername(),
-		FullName: util.RandomString(6),
+		ID:              user1.ID,
+		Username:        util.RandomUsername(),
+		FullName:        util.RandomString(6),
 		ProfileImageUrl: util.RandomString(6),
-		Bio: util.RandomString(20),
+		Bio:             util.RandomString(20),
 	}
 
 	user2, err := testQueries.UpdateUser(context.Background(), arg)
@@ -93,7 +93,7 @@ func TestDeleteUser(t *testing.T) {
 
 	user2, err := testQueries.GetUser(context.Background(), user1.ID)
 	require.Error(t, err)
-	require.EqualError(t, err, sql.ErrNoRows.Error())
+	require.EqualError(t, err, pgx.ErrNoRows.Error())
 	require.Empty(t, user2)
 }
 
@@ -103,7 +103,7 @@ func TestListUsers(t *testing.T) {
 	}
 
 	arg := ListUsersParams{
-		Limit: 5,
+		Limit:  5,
 		Offset: 5,
 	}
 

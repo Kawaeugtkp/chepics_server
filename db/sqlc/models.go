@@ -5,7 +5,6 @@
 package db
 
 import (
-	"database/sql"
 	"time"
 )
 
@@ -17,21 +16,21 @@ type Pickset struct {
 }
 
 type Post struct {
-	ID            int64          `json:"id"`
-	Timestamp     time.Time      `json:"timestamp"`
-	OwnerID       int64          `json:"owner_id"`
-	Type          string         `json:"type"`
-	IsRootOpinion sql.NullBool   `json:"is_root_opinion"`
-	Votes         int32          `json:"votes"`
-	Topic         string         `json:"topic"`
-	Description   sql.NullString `json:"description"`
-	Caption       sql.NullString `json:"caption"`
-	TopicID       sql.NullInt64  `json:"topic_id"`
-	SetID         sql.NullInt64  `json:"set_id"`
-	Category      string         `json:"category"`
-	BaseOpinionID sql.NullInt64  `json:"base_opinion_id"`
-	PostImageUrl  sql.NullString `json:"post_image_url"`
-	Link          sql.NullString `json:"link"`
+	ID            int64     `json:"id"`
+	Timestamp     time.Time `json:"timestamp"`
+	OwnerID       int64     `json:"owner_id"`
+	Type          string    `json:"type"`
+	IsRootOpinion *bool     `json:"is_root_opinion"`
+	Votes         int32     `json:"votes"`
+	Topic         string    `json:"topic"`
+	Description   *string   `json:"description"`
+	Caption       *string   `json:"caption"`
+	TopicID       *int64    `json:"topic_id"`
+	SetID         *int64    `json:"set_id"`
+	Category      string    `json:"category"`
+	BaseOpinionID *int64    `json:"base_opinion_id"`
+	PostImageUrl  *string   `json:"post_image_url"`
+	Link          *string   `json:"link"`
 }
 
 type User struct {

@@ -3,10 +3,8 @@ package api
 import (
 	"database/sql"
 	"net/http"
-	"time"
 
 	db "github.com/Kawaeugtkp/chepics_server/db/sqlc"
-	"github.com/Kawaeugtkp/chepics_server/util"
 	"github.com/gin-gonic/gin"
 )
 
@@ -36,16 +34,16 @@ func (server *Server) createPost(ctx *gin.Context) {
 	arg := db.CreatePostParams{
 		OwnerID:       req.OwnerID,
 		Type:          req.Type,
-		IsRootOpinion: sql.NullBool{Bool: req.IsRootOpinion},
+		IsRootOpinion: &req.IsRootOpinion,
 		Topic:         req.Topic,
-		Description:   sql.NullString{String: req.Description, Valid: util.CheckNonNullString(req.Description)},
-		Caption:       sql.NullString{String: req.Caption, Valid: util.CheckNonNullString(req.Caption)},
-		TopicID:       sql.NullInt64{Int64: req.TopicID, Valid: util.CheckNonNullInt64(req.TopicID)},
-		SetID:         sql.NullInt64{Int64: req.SetID, Valid: util.CheckNonNullInt64(req.SetID)},
+		Description:   &req.Description,
+		Caption:       &req.Caption,
+		TopicID:       &req.TopicID,
+		SetID:         &req.SetID,
 		Category:      req.Category,
-		BaseOpinionID: sql.NullInt64{Int64: req.BaseOpinionID, Valid: util.CheckNonNullInt64(req.BaseOpinionID)},
-		PostImageUrl:  sql.NullString{String: req.PostImageUrl, Valid: util.CheckNonNullString(req.PostImageUrl)},
-		Link:          sql.NullString{String: req.Link, Valid: util.CheckNonNullString(req.Link)},
+		BaseOpinionID: &req.BaseOpinionID,
+		PostImageUrl:  &req.PostImageUrl,
+		Link:          &req.Link,
 	}
 
 	post, err := server.store.CreatePost(ctx, arg)
@@ -78,7 +76,7 @@ func (server *Server) getPost(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, getPostResponse(post))
+	ctx.JSON(http.StatusOK, post)
 }
 
 type listPostRequest struct {
@@ -104,92 +102,92 @@ func (server *Server) listPost(ctx *gin.Context) {
 		return
 	}
 
-	var responses []PostResponse
+	// var responses []PostResponse
 
-	for _, post := range posts {
-		responses = append(responses, getPostResponse(post))
-	}
+	// for _, post := range posts {
+	// 	responses = append(responses, getPostResponse(post))
+	// }
 
-	ctx.JSON(http.StatusOK, responses)
+	ctx.JSON(http.StatusOK, posts)
 }
 
-type PostResponse struct {
-	ID            int64     `json:"id"`
-	Timestamp     time.Time `json:"timestamp"`
-	OwnerID       int64     `json:"owner_id"`
-	Type          string    `json:"type"`
-	IsRootOpinion *bool     `json:"is_root_opinion"`
-	Votes         int32     `json:"votes"`
-	Topic         string    `json:"topic"`
-	Description   *string   `json:"description"`
-	Caption       *string   `json:"caption"`
-	TopicID       *int64    `json:"topic_id"`
-	SetID         *int64    `json:"set_id"`
-	Category      string    `json:"category"`
-	BaseOpinionID *int64    `json:"base_opinion_id"`
-	PostImageUrl  *string   `json:"post_image_url"`
-	Link          *string   `json:"link"`
-}
+// type PostResponse struct {
+// 	ID            int64     `json:"id"`
+// 	Timestamp     time.Time `json:"timestamp"`
+// 	OwnerID       int64     `json:"owner_id"`
+// 	Type          string    `json:"type"`
+// 	IsRootOpinion *bool     `json:"is_root_opinion"`
+// 	Votes         int32     `json:"votes"`
+// 	Topic         string    `json:"topic"`
+// 	Description   *string   `json:"description"`
+// 	Caption       *string   `json:"caption"`
+// 	TopicID       *int64    `json:"topic_id"`
+// 	SetID         *int64    `json:"set_id"`
+// 	Category      string    `json:"category"`
+// 	BaseOpinionID *int64    `json:"base_opinion_id"`
+// 	PostImageUrl  *string   `json:"post_image_url"`
+// 	Link          *string   `json:"link"`
+// }
 
-func getPostResponse(post db.Post) PostResponse {
-	var isRootOpinion *bool
-	var description *string
-	var caption *string
-	var topicId *int64
-	var setId *int64
-	var baseOpinionId *int64
-	var postImageUrl *string
-	var link *string
+// func getPostResponse(post db.Post) PostResponse {
+// 	var isRootOpinion *bool
+// 	var description *string
+// 	var caption *string
+// 	var topicId *int64
+// 	var setId *int64
+// 	var baseOpinionId *int64
+// 	var postImageUrl *string
+// 	var link *string
 
-	if post.IsRootOpinion.Valid {
-		isRootOpinion = &post.IsRootOpinion.Bool
-	}
+// 	if post.IsRootOpinion.Valid {
+// 		isRootOpinion = &post.IsRootOpinion.Bool
+// 	}
 
-	if post.Description.Valid {
-		description = &post.Description.String
-	}
+// 	if post.Description.Valid {
+// 		description = &post.Description.String
+// 	}
 
-	if post.Caption.Valid {
-		caption = &post.Caption.String
-	}
+// 	if post.Caption.Valid {
+// 		caption = &post.Caption.String
+// 	}
 
-	if post.TopicID.Valid {
-		topicId = &post.TopicID.Int64
-	}
+// 	if post.TopicID.Valid {
+// 		topicId = &post.TopicID.Int64
+// 	}
 
-	if post.SetID.Valid {
-		setId = &post.SetID.Int64
-	}
+// 	if post.SetID.Valid {
+// 		setId = &post.SetID.Int64
+// 	}
 
-	if post.BaseOpinionID.Valid {
-		baseOpinionId = &post.BaseOpinionID.Int64
-	}
+// 	if post.BaseOpinionID.Valid {
+// 		baseOpinionId = &post.BaseOpinionID.Int64
+// 	}
 
-	if post.PostImageUrl.Valid {
-		postImageUrl = &post.PostImageUrl.String
-	}
+// 	if post.PostImageUrl.Valid {
+// 		postImageUrl = &post.PostImageUrl.String
+// 	}
 
-	if post.Link.Valid {
-		link = &post.Link.String
-	}
+// 	if post.Link.Valid {
+// 		link = &post.Link.String
+// 	}
 
-	response := PostResponse{
-		ID: post.ID,
-		Timestamp: post.Timestamp,
-		OwnerID: post.OwnerID,
-		Type: post.Type,
-		IsRootOpinion: isRootOpinion,
-		Votes: post.Votes,
-		Topic: post.Topic,
-		Description: description,
-		Caption: caption,
-		TopicID: topicId,
-		SetID: setId,
-		Category: post.Category,
-		BaseOpinionID: baseOpinionId,
-		PostImageUrl: postImageUrl,
-		Link: link,
-	}
+// 	response := PostResponse{
+// 		ID: post.ID,
+// 		Timestamp: post.Timestamp,
+// 		OwnerID: post.OwnerID,
+// 		Type: post.Type,
+// 		IsRootOpinion: isRootOpinion,
+// 		Votes: post.Votes,
+// 		Topic: post.Topic,
+// 		Description: description,
+// 		Caption: caption,
+// 		TopicID: topicId,
+// 		SetID: setId,
+// 		Category: post.Category,
+// 		BaseOpinionID: baseOpinionId,
+// 		PostImageUrl: postImageUrl,
+// 		Link: link,
+// 	}
 
-	return response
-}
+// 	return response
+// }

@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createPost = `-- name: CreatePost :one
@@ -30,22 +29,22 @@ INSERT INTO posts (
 `
 
 type CreatePostParams struct {
-	OwnerID       int64          `json:"owner_id"`
-	Type          string         `json:"type"`
-	IsRootOpinion sql.NullBool   `json:"is_root_opinion"`
-	Topic         string         `json:"topic"`
-	Description   sql.NullString `json:"description"`
-	Caption       sql.NullString `json:"caption"`
-	TopicID       sql.NullInt64  `json:"topic_id"`
-	SetID         sql.NullInt64  `json:"set_id"`
-	Category      string         `json:"category"`
-	BaseOpinionID sql.NullInt64  `json:"base_opinion_id"`
-	PostImageUrl  sql.NullString `json:"post_image_url"`
-	Link          sql.NullString `json:"link"`
+	OwnerID       int64   `json:"owner_id"`
+	Type          string  `json:"type"`
+	IsRootOpinion *bool   `json:"is_root_opinion"`
+	Topic         string  `json:"topic"`
+	Description   *string `json:"description"`
+	Caption       *string `json:"caption"`
+	TopicID       *int64  `json:"topic_id"`
+	SetID         *int64  `json:"set_id"`
+	Category      string  `json:"category"`
+	BaseOpinionID *int64  `json:"base_opinion_id"`
+	PostImageUrl  *string `json:"post_image_url"`
+	Link          *string `json:"link"`
 }
 
 func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, error) {
-	row := q.db.QueryRowContext(ctx, createPost,
+	row := q.db.QueryRow(ctx, createPost,
 		arg.OwnerID,
 		arg.Type,
 		arg.IsRootOpinion,
@@ -86,7 +85,7 @@ WHERE id = $1
 `
 
 func (q *Queries) DeletePost(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, deletePost, id)
+	_, err := q.db.Exec(ctx, deletePost, id)
 	return err
 }
 
@@ -96,7 +95,7 @@ WHERE id = $1  LIMIT 1
 `
 
 func (q *Queries) GetPost(ctx context.Context, id int64) (Post, error) {
-	row := q.db.QueryRowContext(ctx, getPost, id)
+	row := q.db.QueryRow(ctx, getPost, id)
 	var i Post
 	err := row.Scan(
 		&i.ID,
@@ -131,7 +130,7 @@ type ListPostsParams struct {
 }
 
 func (q *Queries) ListPosts(ctx context.Context, arg ListPostsParams) ([]Post, error) {
-	rows, err := q.db.QueryContext(ctx, listPosts, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, listPosts, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -160,9 +159,6 @@ func (q *Queries) ListPosts(ctx context.Context, arg ListPostsParams) ([]Post, e
 		}
 		items = append(items, i)
 	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
@@ -182,7 +178,7 @@ type UpdatePostParams struct {
 }
 
 func (q *Queries) UpdatePost(ctx context.Context, arg UpdatePostParams) (Post, error) {
-	row := q.db.QueryRowContext(ctx, updatePost, arg.ID, arg.Votes)
+	row := q.db.QueryRow(ctx, updatePost, arg.ID, arg.Votes)
 	var i Post
 	err := row.Scan(
 		&i.ID,

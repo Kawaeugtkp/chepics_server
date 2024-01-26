@@ -2,11 +2,11 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 	"time"
 
 	"github.com/Kawaeugtkp/chepics_server/util"
+	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/require"
 )
 
@@ -109,7 +109,7 @@ func TestDeletePost(t *testing.T) {
 
 	post2, err := testQueries.GetPost(context.Background(), post1.ID)
 	require.Error(t, err)
-	require.EqualError(t, err, sql.ErrNoRows.Error())
+	require.EqualError(t, err, pgx.ErrNoRows.Error())
 	require.Empty(t, post2)
 }
 
@@ -119,7 +119,7 @@ func TestListPosts(t *testing.T) {
 	}
 
 	arg := ListPostsParams{
-		Limit: 5,
+		Limit:  5,
 		Offset: 5,
 	}
 
