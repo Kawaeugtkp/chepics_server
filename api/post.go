@@ -11,16 +11,16 @@ import (
 type createPostRequest struct {
 	OwnerID       int64  `json:"owner_id" binding:"required"`
 	Type          string `json:"type" binding:"required,oneof=topic opinion"`
-	IsRootOpinion bool   `json:"is_root_opinion"`
+	IsRootOpinion *bool   `json:"is_root_opinion"`
 	Topic         string `json:"topic" binding:"required"`
-	Description   string `json:"description"`
-	Caption       string `json:"caption"`
-	TopicID       int64  `json:"topic_id"`
-	SetID         int64  `json:"set_id"`
+	Description   *string `json:"description"`
+	Caption       *string `json:"caption"`
+	TopicID       *int64  `json:"topic_id"`
+	SetID         *int64  `json:"set_id"`
 	Category      string `json:"category" binding:"required,oneof=news sport entertainment covid economy tech fashion life gourmet browse culture anime funny love"`
-	BaseOpinionID int64  `json:"base_opinion_id"`
-	PostImageUrl  string `json:"post_image_url"`
-	Link          string `json:"link"`
+	BaseOpinionID *int64  `json:"base_opinion_id"`
+	PostImageUrl  *string `json:"post_image_url"`
+	Link          *string `json:"link"`
 }
 
 func (server *Server) createPost(ctx *gin.Context) {
@@ -30,20 +30,19 @@ func (server *Server) createPost(ctx *gin.Context) {
 		return
 	}
 
-	// TODO: - 自前判断は流石にやばいので解決法を聞く
 	arg := db.CreatePostParams{
 		OwnerID:       req.OwnerID,
 		Type:          req.Type,
-		IsRootOpinion: &req.IsRootOpinion,
+		IsRootOpinion: req.IsRootOpinion,
 		Topic:         req.Topic,
-		Description:   &req.Description,
-		Caption:       &req.Caption,
-		TopicID:       &req.TopicID,
-		SetID:         &req.SetID,
+		Description:   req.Description,
+		Caption:       req.Caption,
+		TopicID:       req.TopicID,
+		SetID:         req.SetID,
 		Category:      req.Category,
-		BaseOpinionID: &req.BaseOpinionID,
-		PostImageUrl:  &req.PostImageUrl,
-		Link:          &req.Link,
+		BaseOpinionID: req.BaseOpinionID,
+		PostImageUrl:  req.PostImageUrl,
+		Link:          req.Link,
 	}
 
 	post, err := server.store.CreatePost(ctx, arg)
@@ -102,92 +101,5 @@ func (server *Server) listPost(ctx *gin.Context) {
 		return
 	}
 
-	// var responses []PostResponse
-
-	// for _, post := range posts {
-	// 	responses = append(responses, getPostResponse(post))
-	// }
-
 	ctx.JSON(http.StatusOK, posts)
 }
-
-// type PostResponse struct {
-// 	ID            int64     `json:"id"`
-// 	Timestamp     time.Time `json:"timestamp"`
-// 	OwnerID       int64     `json:"owner_id"`
-// 	Type          string    `json:"type"`
-// 	IsRootOpinion *bool     `json:"is_root_opinion"`
-// 	Votes         int32     `json:"votes"`
-// 	Topic         string    `json:"topic"`
-// 	Description   *string   `json:"description"`
-// 	Caption       *string   `json:"caption"`
-// 	TopicID       *int64    `json:"topic_id"`
-// 	SetID         *int64    `json:"set_id"`
-// 	Category      string    `json:"category"`
-// 	BaseOpinionID *int64    `json:"base_opinion_id"`
-// 	PostImageUrl  *string   `json:"post_image_url"`
-// 	Link          *string   `json:"link"`
-// }
-
-// func getPostResponse(post db.Post) PostResponse {
-// 	var isRootOpinion *bool
-// 	var description *string
-// 	var caption *string
-// 	var topicId *int64
-// 	var setId *int64
-// 	var baseOpinionId *int64
-// 	var postImageUrl *string
-// 	var link *string
-
-// 	if post.IsRootOpinion.Valid {
-// 		isRootOpinion = &post.IsRootOpinion.Bool
-// 	}
-
-// 	if post.Description.Valid {
-// 		description = &post.Description.String
-// 	}
-
-// 	if post.Caption.Valid {
-// 		caption = &post.Caption.String
-// 	}
-
-// 	if post.TopicID.Valid {
-// 		topicId = &post.TopicID.Int64
-// 	}
-
-// 	if post.SetID.Valid {
-// 		setId = &post.SetID.Int64
-// 	}
-
-// 	if post.BaseOpinionID.Valid {
-// 		baseOpinionId = &post.BaseOpinionID.Int64
-// 	}
-
-// 	if post.PostImageUrl.Valid {
-// 		postImageUrl = &post.PostImageUrl.String
-// 	}
-
-// 	if post.Link.Valid {
-// 		link = &post.Link.String
-// 	}
-
-// 	response := PostResponse{
-// 		ID: post.ID,
-// 		Timestamp: post.Timestamp,
-// 		OwnerID: post.OwnerID,
-// 		Type: post.Type,
-// 		IsRootOpinion: isRootOpinion,
-// 		Votes: post.Votes,
-// 		Topic: post.Topic,
-// 		Description: description,
-// 		Caption: caption,
-// 		TopicID: topicId,
-// 		SetID: setId,
-// 		Category: post.Category,
-// 		BaseOpinionID: baseOpinionId,
-// 		PostImageUrl: postImageUrl,
-// 		Link: link,
-// 	}
-
-// 	return response
-// }
