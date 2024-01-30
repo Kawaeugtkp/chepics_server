@@ -8,7 +8,6 @@ import (
 	db "github.com/Kawaeugtkp/chepics_server/db/sqlc"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/lib/pq"
-	"github.com/vanng822/go-solr/solr"
 )
 
 const (
@@ -24,8 +23,7 @@ func main() {
 	}
 
 	store := db.NewStore(conn)
-	si, _ := solr.NewSolrInterface("http://localhost:8984/solr", "post")
-	server := api.NewServer(store, si)
+	server := api.NewServer(store)
 
 	err = server.Start(serverAddress)
 	if err != nil {

@@ -3,21 +3,18 @@ package api
 import (
 	db "github.com/Kawaeugtkp/chepics_server/db/sqlc"
 	"github.com/gin-gonic/gin"
-	"github.com/vanng822/go-solr/solr"
 )
 
 // Server serves HTTP requests for chepics service.
 type Server struct {
 	store *db.Store
-	solrInterface *solr.SolrInterface
 	router *gin.Engine
 }
 
 // NewServer creates a new HTTP server and setup routing.
-func NewServer(store *db.Store, solrInterface *solr.SolrInterface) *Server {
+func NewServer(store *db.Store) *Server {
 	server := &Server{
 		store: store,
-		solrInterface: solrInterface,
 	}
 	router := gin.Default()
 

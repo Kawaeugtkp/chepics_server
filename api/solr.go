@@ -1,16 +1,17 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"net/url"
 
 	"github.com/gin-gonic/gin"
-	"github.com/vanng822/go-solr/solr"
 )
 
 type listSolrPostRequest struct {
 	// 大文字！！！！！！
-	Key  string `form:"key" binding:"required"`
 	Word string `form:"word" binding:"required"`
 }
 
@@ -20,16 +21,31 @@ func (server *Server) listSolrPost(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	encodedQuery := url.QueryEscape(req.Word)
+	url := fmt.Sprintf("http://localhost:8984/solr/post/search?indent=true&start=0&q=%s", encodedQuery)
 
-	query := solr.NewQuery()
-	queryString := fmt.Sprintf("%s:%s", req.Key, req.Word)
-	query.Q(queryString)
-	search := server.solrInterface.Search(query)
-	result, err := search.Result(nil)
+	resp, err := http.Get(url)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	defer resp.Body.Close()
+	
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, result.Results.Docs)
+	var result map[string]interface{}
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	response := result["response"].(map[string]interface{})
+	docs := response["docs"].([]interface{})
+
+	ctx.JSON(http.StatusOK, docs)
 }

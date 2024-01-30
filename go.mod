@@ -7,7 +7,6 @@ require (
 	github.com/jackc/pgx/v5 v5.5.2
 	github.com/lib/pq v1.10.9
 	github.com/stretchr/testify v1.8.4
-	github.com/vanng822/go-solr v0.10.0
 )
 
 require (
