@@ -22,10 +22,7 @@ func (server *Server) listSolrPost(ctx *gin.Context) {
 	}
 
 	query := solr.NewQuery()
-	fmt.Println("DEBUG: key is ", req.Key)
-	fmt.Println("DEBUG: word is ", req.Word)
 	queryString := fmt.Sprintf("%s:%s", req.Key, req.Word)
-	fmt.Println("DEBUG: ", queryString)
 	query.Q(queryString)
 	search := server.solrInterface.Search(query)
 	result, err := search.Result(nil)
